@@ -10,9 +10,11 @@ import lombok.ToString;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Getter
@@ -20,38 +22,45 @@ import java.util.List;
 @ToString
 @RequiredArgsConstructor
 @Log4j2
-public class MemberSerivce {
+public class MemberService {
+
     private final MemberRepository memberRepository;
 
-    // CRUD -> insert, update
-    public void update(Member member) {
-        log.info("register..or update....");
+    //CRUD -> insert,update
+    public void register(Member member){
+        log.info("register..or update......");
         memberRepository.save(member);
     }
 
-    // CRUD -> delete
-    public void delete(long memberId) {
-        log.info("delete....");
+    //CRUD -> delete
+    public void delete(long memberId){
+        log.info("delete........");
         memberRepository.deleteById(memberId);
     }
 
-    // CRUD -> readOne
-    public Member readOne(long memberId) {
-        log.info("readOne....");
-        Member member = memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException());
+    //CRUD -> readOne
+    public Member readOne(long memberId){
+        log.info("readOne.........");
+
+        Member member =
+                memberRepository.findById(memberId).orElseThrow(() -> new EntityNotFoundException());
         return member;
     }
 
-    // ReadList
-    public List<Member> readList() {
-        log.info("ReadList....");
+    //ReadList
+    public List<Member> readList(){
+        log.info("ReadList.............");
+
         return memberRepository.findAll();
     }
 
-    // paging
+    //paging
     public Page<Member> readPaging(Pageable pageable){
-        log.info("ReadPaging....");
+
+        log.info("readpagging..........");
+
         return memberRepository.findAll(pageable);
+
     }
 
 }

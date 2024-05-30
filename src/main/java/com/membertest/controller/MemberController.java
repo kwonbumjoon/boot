@@ -1,14 +1,16 @@
 package com.membertest.controller;
 
 import com.membertest.entity.Member;
-import com.membertest.service.MemberSerivce;
+import com.membertest.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -18,7 +20,7 @@ import java.util.List;
 @RequestMapping("/member")
 public class MemberController {
 
-    private final MemberSerivce memberSerivce;
+    private final MemberService memberSerivce;
 
     @GetMapping("/read/{id}")
     public String readOne(@PathVariable("id") Long id) {
@@ -34,8 +36,49 @@ public class MemberController {
         List<Member> members = memberSerivce.readList();
 
         log.info(members);
-        model.addAttribute("member", members);
-        return "member/list";
+        model.addAttribute("members", members);
+        return "/member/list";
+    }
+
+    @GetMapping("/new")
+    public String newGet(Model model){
+        model.addAttribute("member", new Member());
+        return "/member/newForm";
+    }
+
+    @PostMapping(value = {"/new", "/edit"})
+    public String newPost(@ModelAttribute Member member){
+        log.info("newPost : " +member);
+
+        // 회원 저장..
+        memberSerivce.register(member);
+        return "redirect:/member/list";
+    }
+
+    // 수정
+    // <a th:href="@{/member/edit/{id}(id=${member.id})}">수정</a>&nbsp;&nbsp;
+    @GetMapping("/edit/{id}")
+    public String edit(@PathVariable("id") Long id, Model model){
+        Member member = memberSerivce.readOne(id);
+        model.addAttribute("member", member);
+        return "member/updateForm";
+    }
+
+    @PostMapping("/delete/{id}")
+    public String deletePost(@PathVariable("id") Long id){
+        memberSerivce.delete(id);
+        return "redirect:/member/list";
+    }
+
+    // 페이징 처리
+    @GetMapping("/list2")
+    public String listPage(@RequestParam(name = "page", defaultValue = "0") int page,
+                           @RequestParam(name = "size", defaultValue = "5") int size,
+                           Model model){
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Member> memberPage = memberSerivce.readPaging(pageable);
+        model.addAttribute("memberPage", memberPage);
+        return "member/list2";
     }
 
 }
